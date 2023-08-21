@@ -1,0 +1,13 @@
+canvas {
+    border: 1px solid green;
+    background-color: yellow
+  }
+#glcanvas { 
+    z-index: 1;    
+  }
+
+p {
+    color: blueviolet;
+    position:absolute;
+    z-index: 2;
+}
