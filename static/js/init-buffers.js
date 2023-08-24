@@ -1,18 +1,23 @@
-import {monochromatic,basicColours,colourScheme1,dodecahedronColours, dodecahedronPosistionOrdered,dodecahedronIndecies,dodecahedronIndeciesLinesOrdered,dodecahedronIndeciesOrdered,dodecahedronPosistion,cubeIndecies,cubePosistions} from "./constants.js"
-
-function initBuffers(gl){
-    const posistionBuffer = initPosistionBuffer(gl);
-    const colourBuffer = initColourBuffer(gl);
-    const indexBuffer = initIndexBuffer(gl);
-
+function initBuffers(gl, pos, colour, index, type){
+    const posistionBuffer = initPosistionBuffer(gl, pos);
+    let colourBuffer = null;
+    if (type == 0){
+        colourBuffer = initColourBufferVertex(gl, colour);
+    }else{
+        colourBuffer = initColourBufferFace(gl, colour);
+    }
+    const indexBuffer = initIndexBuffer(gl, index);
+    const vertices = index.length;
     return{
         position:posistionBuffer,
         colour:colourBuffer,
         indices:indexBuffer,
+        numVertices: vertices,
+        type:type,
     };
 }
 
-function initIndexBuffer(gl){
+function initIndexBuffer(gl, index){
     const indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
@@ -21,7 +26,7 @@ function initIndexBuffer(gl){
   // indices into the vertex array to specify each triangle's
   // position.
 
-  const indices = dodecahedronIndeciesLinesOrdered;
+  const indices = index;
 
   // Now send the element array to GL
 
@@ -34,9 +39,9 @@ function initIndexBuffer(gl){
   return indexBuffer;
 }
 
-function initColourBuffer(gl){
+function initColourBufferVertex(gl, col){
 
-    const faceColors = monochromatic;
+    const faceColors = col;
 
     // Convert the array of colors into a table for all the vertices.
 
@@ -47,7 +52,6 @@ function initColourBuffer(gl){
         // Repeat each color five times for the five vertices of the face
         colours = colours.concat(c);
     }
-    console.log(colours);
     const colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colours), gl.STATIC_DRAW);
@@ -55,15 +59,34 @@ function initColourBuffer(gl){
     return colorBuffer;
 }
 
-function initPosistionBuffer(gl){
+function initColourBufferFace(gl, col){
+    
+    const faceColors = col;
+
+    // Convert the array of colors into a table for all the vertices.
+
+    var colours = [];
+
+    for (var j = 0; j < faceColors.length; j++) {
+        const c = faceColors[j];
+        // Repeat each color five times for the five vertices of the face
+        colours = colours.concat(c, c, c);
+    }
+    const colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colours), gl.STATIC_DRAW);
+    
+    return colorBuffer;
+}
+
+function initPosistionBuffer(gl, pos){
     //Create buffer for the vertices
-    console.log(typeof dodecahedronPosistion)
     const posistionBuffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, posistionBuffer);
 
     // Array of positions of a square
-    const positions = dodecahedronPosistionOrdered;
+    const positions = pos;
 
     // Now pass the list of positions into WebGL to build the
     // shape. We do this by creating a Float32Array from the

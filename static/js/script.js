@@ -3,6 +3,7 @@
 ///////////////////////////////
 import { initBuffers } from "./init-buffers.js";
 import { drawScene } from "./draw-scene.js";
+import {monochromatic,basicColours,colourScheme1,dodecahedronColours, dodecahedronPosistionOrdered,dodecahedronIndecies,dodecahedronIndeciesLinesOrdered,dodecahedronIndeciesOrdered,dodecahedronPosistion,cubeIndecies,cubePosistions} from "./constants.js"
 ///////////////////////////////
 // GLSL source
 ///////////////////////////////
@@ -42,7 +43,7 @@ const fragmentSource = `
 // Global variables
 ///////////////////////////////
 
-let cubeRotation = 0.0;
+let rotation = 0.0;
 let deltaTime = 0;
 
 ///////////////////////////////
@@ -100,8 +101,6 @@ function initShaderProgram(gl, vertexSource, fragmentSource) {
 
 function main(){
 
-
-
   ///GL Stuff
   const canvas = document.querySelector("#glcanvas");
   //Init gl context
@@ -131,7 +130,26 @@ function main(){
         modelViewMatrix: gl.getUniformLocation(shaderProgram, "modelViewMatrix"),
       },
   };
-  const buffers = initBuffers(gl);
+  const dodec = initBuffers(gl, dodecahedronPosistionOrdered, monochromatic, dodecahedronIndeciesLinesOrdered, 0);
+  const cube = initBuffers(gl, cubePosistions, monochromatic, cubeIndecies, 1);
+
+  const buffers = [dodec, cube];
+
+  const doRotation = 1;
+  const cubeRotation = -0.7;
+
+  var objectsToDraw = [
+    {
+      programInfo: programInfo,
+      bufferInfo: dodec,
+      rotation: doRotation,
+    },
+    {
+      programInfo: programInfo,
+      bufferInfo: cube,
+      rotation: cubeRotation,
+    },
+  ]
 
 
   ///////////////////////////////
@@ -145,9 +163,8 @@ function main(){
     now *= 0.001; // convert to seconds
     deltaTime = now - then;
     then = now;
-
-    drawScene(gl, programInfo, buffers, cubeRotation);
-    cubeRotation += deltaTime;
+    drawScene(gl, objectsToDraw, rotation);
+    rotation += deltaTime;
 
     requestAnimationFrame(render);
   }
