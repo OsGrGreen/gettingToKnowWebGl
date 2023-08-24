@@ -1,13 +1,57 @@
 canvas {
-    border: 1px solid green;
-    background-color: yellow
-  }
-#glcanvas { 
-    z-index: 1;    
+    background-color: #1A1815;
   }
 
+
+
+#glcanvas { 
+}
+
+div.container {
+  display: block;
+  background-color:rgba(247,231,205,0.8);
+  position: absolute; 
+  width: 50vh;
+  height: 17vh;
+  margin-top: 250px;
+  margin-left: 300px;
+  z-index: 2;
+  border: 2px solid black;
+}
+
+/*  COLOUR SCHEME:
+  Foreground:#F7E7CD
+  Background:#1A1815
+  Cursor color:#87281F
+  Selection background: #8C452B
+
+  Black:#33302A
+  Red: #E34234
+  Green: #FF7F50
+  Yellow: #E25822
+  Blue: #FF6600
+  Purple:#ED9121
+  Cyan: #FFBF00
+  White: #F7E7CE
+
+*/
 p {
-    color: blueviolet;
+    opacity: 1;
+    color: #E34234;
     position:absolute;
     z-index: 2;
+    margin-left: 5px;
+}
+
+.glcanvas{
+  height: 100vh!important;
+  width: 100vw!important;
+}
+
+#background_scene{
+  position: fixed; 
+  top: 0px; left: 0px; 
+  width: 100vw; height: 100vh; 
+  z-index: 0; 
+  opacity: 1;
 }

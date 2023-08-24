@@ -7,19 +7,43 @@ import { drawScene } from "./draw-scene.js";
 // GLSL source
 ///////////////////////////////
 const vertexSource = `
+
+    // Variables:
     attribute vec4 vertexPosition;
+    attribute vec4 vertexColour;
+
     uniform mat4 modelViewMatrix;
     uniform mat4 projectionMatrix;
+
+    varying mediump vec4 vColour;
+
+    //Function
     void main() {
       gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
+      //gl_Position = vertexPosition;
+      vColour = vertexColour * (sin(vertexPosition[3]));
     }
   `;
 
 const fragmentSource = `
+
+  precision mediump float;
+  varying mediump vec4 vColour;
+
+  //Function
   void main() {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    //gl_FragColor = vec4(vec3(vColour),1.0);
+    gl_FragColor = vColour;
   }
 `;
+
+
+///////////////////////////////
+// Global variables
+///////////////////////////////
+
+let cubeRotation = 0.0;
+let deltaTime = 0;
 
 ///////////////////////////////
 // GL functions
@@ -68,40 +92,67 @@ function initShaderProgram(gl, vertexSource, fragmentSource) {
 }
 
 
+
+
 ///////////////////////////////
 // Main function
 ///////////////////////////////
 
 function main(){
-    const canvas = document.querySelector("#glcanvas");
-    //Init gl context
-    const gl = canvas.getContext("webgl");
 
-    //Only continue if webGl is working
-    if (gl == null){
-        alert("Unable to init WebGL");
-        return;
-    }
 
-    //Set clear colour
-    gl.clearColor(0.0,0.3,0.3,1.0);
-    //Clear the colour buffer with set colour
-    gl.clear(gl.COLOR_BUFFER_BIT);
 
-    const shaderProgram = initShaderProgram(gl, vertexSource, fragmentSource);
+  ///GL Stuff
+  const canvas = document.querySelector("#glcanvas");
+  //Init gl context
+  const gl = canvas.getContext("webgl");
 
-    const programInfo = {
-        program : shaderProgram,
-        attribLocations:{
-            vertexPosistion: gl.getAttribLocation(shaderProgram, "vertexPosition"),
-        },
-        uniformLocations:{
-            projectionMatrix: gl.getUniformLocation(shaderProgram,"projectionMatrix"),
-            modelViewMatrix: gl.getUniformLocation(shaderProgram, "modelViewMatrix"),
-        },
-    };
-    const buffers = initBuffers(gl);
-    drawScene(gl, programInfo, buffers);
+  //Only continue if webGl is working
+  if (gl == null){
+    alert("Unable to init WebGL");
+    return;
+  }
+
+  //Set clear colour
+  gl.clearColor(0.0,0.3,0.3,1.0);
+  //Clear the colour buffer with set colour
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  const shaderProgram = initShaderProgram(gl, vertexSource, fragmentSource);
+
+  const programInfo = {
+      program : shaderProgram,
+      attribLocations:{
+        vertexPosistion: gl.getAttribLocation(shaderProgram, "vertexPosition"),
+        vertexColour: gl.getAttribLocation(shaderProgram,"vertexColour"),
+      },
+      uniformLocations:{
+        projectionMatrix: gl.getUniformLocation(shaderProgram,"projectionMatrix"),
+        modelViewMatrix: gl.getUniformLocation(shaderProgram, "modelViewMatrix"),
+      },
+  };
+  const buffers = initBuffers(gl);
+
+
+  ///////////////////////////////
+  // Render function
+  ///////////////////////////////
+
+  let then = 0;
+
+  // Draw the scene repeatedly
+  function render(now) {
+    now *= 0.001; // convert to seconds
+    deltaTime = now - then;
+    then = now;
+
+    drawScene(gl, programInfo, buffers, cubeRotation);
+    cubeRotation += deltaTime;
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
 }
 
 ///////////////////////////////
