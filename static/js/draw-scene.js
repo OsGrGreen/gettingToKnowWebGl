@@ -37,7 +37,7 @@ function setColourAttribute(gl, buffers, programInfo){
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexColour);
 }
 
-function updateMatrices(gl, rotation){
+function updateMatrices(gl, rotation, type){
     //Create perspective matrix
     const fieldOfView = (45 * Math.PI) / 180; // 45  degrees in radians
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -75,6 +75,14 @@ function updateMatrices(gl, rotation){
         [1, 0, 0],
     ); // axis to rotate around (X)
 
+    if (type == 1){ 
+        mat4.scale(
+            modelViewMatrix,
+            modelViewMatrix,
+            [0.6,0.6,0.6], //Scale cube by 0.6
+        )
+    }
+
     const uniform = {projectionMatrix: projectionMatrix, modelViewMatrix:modelViewMatrix};
     return uniform;
 }
@@ -82,7 +90,7 @@ function updateMatrices(gl, rotation){
 function drawObject(gl, object, rotation) {
     let programInfo = object.programInfo;
     let bufferInfo = object.bufferInfo;
-    let uniform = updateMatrices(gl, rotation*object.rotation);
+    let uniform = updateMatrices(gl, rotation*object.rotation, bufferInfo.type);
   
     // Setup all the needed attributes.
     setPositionAttribute(gl, bufferInfo, programInfo);

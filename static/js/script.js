@@ -20,9 +20,10 @@ const vertexSource = `
 
     //Function
     void main() {
-      gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
+      vec4 worldPos = projectionMatrix * modelViewMatrix * vertexPosition;
+      gl_Position = worldPos;
       //gl_Position = vertexPosition;
-      vColour = vertexColour * (sin(vertexPosition[3]));
+      vColour = vertexColour + sin(vertexPosition * modelViewMatrix)*0.3;
     }
   `;
 
@@ -163,7 +164,11 @@ function main(){
     now *= 0.001; // convert to seconds
     deltaTime = now - then;
     then = now;
+    //const startTime = performance.now(); //Try to keep below 8 ms for rendering only
     drawScene(gl, objectsToDraw, rotation);
+    //const endTime = performance.now();
+    //const executionTime = endTime - startTime;
+    //console.log(`Execution time: ${executionTime} ms`);
     rotation += deltaTime;
 
     requestAnimationFrame(render);
