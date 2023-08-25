@@ -1,9 +1,9 @@
 ///////////////////////////////
 // Imports
 ///////////////////////////////
-import { initBuffers } from "./init-buffers.js";
-import { drawScene } from "./draw-scene.js";
-import {monochromatic,basicColours,colourScheme1,dodecahedronColours, dodecahedronPosistionOrdered,dodecahedronIndecies,dodecahedronIndeciesLinesOrdered,dodecahedronIndeciesOrdered,dodecahedronPosistion,cubeIndecies,cubePosistions} from "./constants.js"
+import { initBuffers, initBuffersTexture} from "./init-buffers.js";
+import { drawScene, createTexture, drawPlane, drawSceneTexture} from "./draw-scene.js";
+import {tex,planePos, planeTrig,cubeLines, monochromatic,basicColours,colourScheme1,dodecahedronColours, dodecahedronPosistionOrdered,dodecahedronIndecies,dodecahedronIndeciesLinesOrdered,dodecahedronIndeciesOrdered,dodecahedronPosistion,cubeIndecies,cubePosistions} from "./constants.js"
 ///////////////////////////////
 // GLSL source
 ///////////////////////////////
@@ -39,6 +39,69 @@ const fragmentSource = `
   }
 `;
 
+const simpleVertexSource = `
+
+    // Variables:
+    attribute vec4 vertexPosition;
+    attribute vec4 vertexColour;
+    
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+
+    varying mediump vec4 vColour;
+
+    //Function
+    void main() {
+      vec4 worldPos = projectionMatrix * modelViewMatrix * vertexPosition;
+      gl_Position = worldPos;
+      vColour = vertexColour;
+    }
+  `;
+
+const simpleFragmentSource = `
+
+  precision mediump float;
+
+  varying mediump vec4 vColour;
+
+  //Function
+  void main() {
+    gl_FragColor = vColour;
+  }
+`;
+
+const textureVertexSource = `
+  attribute vec4 vertexPosition;
+  attribute vec4 vertexColour;
+  attribute vec2 texCoord;
+
+  uniform mat4 modelViewMatrix;
+  uniform mat4 projectionMatrix;
+
+  varying vec2 v_texcoord;
+
+  void main() {
+    // Multiply the position by the matrix.
+    gl_Position = vertexPosition;
+
+    // Pass the texcoord to the fragment shader.
+    v_texcoord = texCoord;
+  }
+`;
+
+const textureFragmentSource = `
+  precision mediump float;
+
+  // Passed in from the vertex shader.
+  varying vec2 v_texcoord;
+
+  // The texture.
+  uniform sampler2D u_texture;
+
+  void main() {
+    gl_FragColor = texture2D(u_texture, v_texcoord+vec2(0.0,0.0));
+  }
+`
 
 ///////////////////////////////
 // Global variables
@@ -119,11 +182,13 @@ function main(){
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   const shaderProgram = initShaderProgram(gl, vertexSource, fragmentSource);
+  const blackShaderProgram = initShaderProgram(gl, simpleVertexSource, simpleFragmentSource);
+  const textureProgram = initShaderProgram(gl, textureVertexSource, textureFragmentSource);
 
   const programInfo = {
       program : shaderProgram,
       attribLocations:{
-        vertexPosistion: gl.getAttribLocation(shaderProgram, "vertexPosition"),
+        vertexPosition: gl.getAttribLocation(shaderProgram, "vertexPosition"),
         vertexColour: gl.getAttribLocation(shaderProgram,"vertexColour"),
       },
       uniformLocations:{
@@ -131,11 +196,36 @@ function main(){
         modelViewMatrix: gl.getUniformLocation(shaderProgram, "modelViewMatrix"),
       },
   };
+  const programBlackInfo = {
+    program : blackShaderProgram,
+    attribLocations:{
+      vertexPosition: gl.getAttribLocation(blackShaderProgram, "vertexPosition"),
+      vertexColour: gl.getAttribLocation(blackShaderProgram,"vertexColour"),
+    },
+    uniformLocations:{
+      projectionMatrix: gl.getUniformLocation(blackShaderProgram,"projectionMatrix"),
+      modelViewMatrix: gl.getUniformLocation(blackShaderProgram, "modelViewMatrix"),
+    },
+  };
+  const textureProgramInfo = {
+    program : textureProgram,
+    attribLocations:{
+      vertexPosition: gl.getAttribLocation(blackShaderProgram, "vertexPosition"),
+      vertexColour: gl.getAttribLocation(blackShaderProgram,"vertexColour"),
+      texCoord: gl.getAttribLocation(blackShaderProgram, "texCoord"),
+    },
+    uniformLocations:{
+      projectionMatrix: gl.getUniformLocation(textureProgram,"projectionMatrix"),
+      modelViewMatrix: gl.getUniformLocation(textureProgram, "modelViewMatrix"),
+      texture: gl.getUniformLocation(textureProgram,"u_texture"),
+    },
+  }
   const dodec = initBuffers(gl, dodecahedronPosistionOrdered, monochromatic, dodecahedronIndeciesLinesOrdered, 0);
   const cube = initBuffers(gl, cubePosistions, monochromatic, cubeIndecies, 1);
+  const cubeLine = initBuffers(gl, cubePosistions, [0.0,0.0,0.0,1.0], cubeLines, 2);
+  const plane = initBuffersTexture(gl, planePos, [0.75,1.0,0.0,1.0], planeTrig, 3, tex);
 
-  const buffers = [dodec, cube];
-
+  
   const doRotation = 1;
   const cubeRotation = -0.7;
 
@@ -150,7 +240,22 @@ function main(){
       bufferInfo: cube,
       rotation: cubeRotation,
     },
+    {
+      programInfo: programBlackInfo,
+      bufferInfo: cubeLine,
+      rotation: cubeRotation,
+    },
   ]
+
+  var planeInfo = {
+      programInfo: textureProgramInfo,
+      bufferInfo: plane,
+      rotation: 0,
+    };
+    
+  const res = createTexture(gl);
+  const fb = res[0];
+  const tx = res[1];
 
 
   ///////////////////////////////
@@ -165,7 +270,8 @@ function main(){
     deltaTime = now - then;
     then = now;
     //const startTime = performance.now(); //Try to keep below 8 ms for rendering only
-    drawScene(gl, objectsToDraw, rotation);
+    //drawScene(gl, objectsToDraw, rotation);
+    drawSceneTexture(gl, fb, tx, planeInfo, objectsToDraw, rotation);
     //const endTime = performance.now();
     //const executionTime = endTime - startTime;
     //console.log(`Execution time: ${executionTime} ms`);

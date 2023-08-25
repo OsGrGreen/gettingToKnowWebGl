@@ -10,11 +10,7 @@ canvas {
 div.container {
   display: block;
   background-color:rgba(247,231,205,0.8);
-  position: absolute; 
-  width: 50vh;
-  height: 17vh;
-  margin-top: 250px;
-  margin-left: 300px;
+  position: relative; 
   z-index: 2;
   border: 2px solid black;
 }
@@ -38,9 +34,21 @@ div.container {
 p {
     opacity: 1;
     color: #E34234;
-    position:absolute;
+    font-size: 35px;
     z-index: 2;
     margin-left: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+}
+
+.typewrite{
+
+}
+
+.typewrite.active::after{
+  content: "|";
+  animation: blink 500ms cubic-bezier(1,-0.07,.01,1.08) infinite alternate;
 }
 
 .glcanvas{
@@ -54,4 +62,29 @@ p {
   width: 100vw; height: 100vh; 
   z-index: 0; 
   opacity: 1;
+}
+
+@-webkit-keyframes blink{
+  0%{opacity: 0;}
+  100%{opacity: 1;}
+}
+
+@-moz-keyframes blink{
+  0%{opacity: 0;}
+  100%{opacity: 1;}
+}
+
+@keyframes blink{
+  0%{opacity: 0;}
+  100%{opacity: 1;}
+}
+
+::-moz-selection { /* Code for Firefox */
+  color: #33302A;
+  background: #FFBF00;
+}
+
+::selection {
+  color: #33302A;
+  background: #FFBF00;
 }

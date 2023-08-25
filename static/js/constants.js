@@ -1,3 +1,61 @@
+const planePos = [
+  -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
+];
+
+const planeTrig = [
+  0,
+  1,
+  2,
+  0,
+  2,
+  3,
+];
+
+const tex = [
+  0, 0,
+  0, 1,
+  1, 0,
+  0, 1,
+  1, 1,
+  1, 0,
+
+  0, 0,
+  0, 1,
+  1, 0,
+  1, 0,
+  0, 1,
+  1, 1,
+
+  0, 0,
+  0, 1,
+  1, 0,
+  0, 1,
+  1, 1,
+  1, 0,
+
+  0, 0,
+  0, 1,
+  1, 0,
+  1, 0,
+  0, 1,
+  1, 1,
+
+  0, 0,
+  0, 1,
+  1, 0,
+  0, 1,
+  1, 1,
+  1, 0,
+
+  0, 0,
+  0, 1,
+  1, 0,
+  1, 0,
+  0, 1,
+  1, 1,
+
+];
+
 const cubePosistions = [
     // Front face
     -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
@@ -107,7 +165,11 @@ const cubePosistions = [
     22,
     23, // left
   ];
-  
+
+  const cubeLines = [
+    0, 1, 1, 2, 2 ,3, 3, 0, 0, 4, 4, 5, 5 ,3, 5, 6, 6, 2, 6 ,7, 7, 1, 7, 4,
+  ]
+
   const cubeColours = [
     [0.89, 0.259, 0.204, 1.0], // Front face: white
     [1.0, 0.498, 0.314, 1.0], // Back face: red
@@ -323,4 +385,4 @@ const cubePosistions = [
     [1.0, 0.75, 0.3, 1.0],
   ];
 
-  export {monochromatic,basicColours,colourScheme1,dodecahedronColours, dodecahedronPosistionOrdered,dodecahedronIndecies,dodecahedronIndeciesLinesOrdered,dodecahedronIndeciesOrdered,dodecahedronPosistion,cubeIndecies,cubePosistions}
+  export {tex, planePos, planeTrig, cubeLines, monochromatic,basicColours,colourScheme1,dodecahedronColours, dodecahedronPosistionOrdered,dodecahedronIndecies,dodecahedronIndeciesLinesOrdered,dodecahedronIndeciesOrdered,dodecahedronPosistion,cubeIndecies,cubePosistions}

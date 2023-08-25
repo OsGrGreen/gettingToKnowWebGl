@@ -3,6 +3,8 @@ function initBuffers(gl, pos, colour, index, type){
     let colourBuffer = null;
     if (type == 0){
         colourBuffer = initColourBufferVertex(gl, colour);
+    }else if(type == 2){
+        colourBuffer = initColourBufferVertex(gl, [0.0,0.0,0.0,1.0]);
     }else{
         colourBuffer = initColourBufferFace(gl, colour);
     }
@@ -15,6 +17,50 @@ function initBuffers(gl, pos, colour, index, type){
         numVertices: vertices,
         type:type,
     };
+}
+
+
+
+function initBuffersTexture(gl, pos, colour, index, type, texture){
+    const posistionBuffer = initPosistionBuffer(gl, pos);
+    let colourBuffer = null;
+    if (type == 0){
+        colourBuffer = initColourBufferVertex(gl, colour);
+    }else if(type == 2){
+        colourBuffer = initColourBufferVertex(gl, [0.0,0.0,0.0,1.0]);
+    }else{
+        colourBuffer = initColourBufferFace(gl, colour);
+    }
+    const indexBuffer = initIndexBuffer(gl, index);
+    const vertices = index.length;
+    let texcoordBuffer = null;
+    if (texture != null){
+        texcoordBuffer = initTextureBuffer(gl, texture);
+    }else{
+        texcoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
+    }
+    return{
+        position:posistionBuffer,
+        colour:colourBuffer,
+        texcoord: texcoordBuffer,
+        indices:indexBuffer,
+        numVertices: vertices,
+        type:type,
+    };
+}
+
+function initTextureBuffer(gl, texture){
+    const texcoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Uint16Array(texture),
+        gl.STATIC_DRAW,
+    );
+    
+    return texcoordBuffer;
 }
 
 function initIndexBuffer(gl, index){
@@ -96,4 +142,4 @@ function initPosistionBuffer(gl, pos){
     return posistionBuffer;
 }
 
-export { initBuffers };
+export { initBuffers, initBuffersTexture};
