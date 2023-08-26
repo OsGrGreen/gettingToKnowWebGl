@@ -1,8 +1,8 @@
 ///////////////////////////////
 // Imports
 ///////////////////////////////
-import { initBuffers, initBuffersTexture} from "./init-buffers.js";
-import { drawScene, createTexture, drawPlane, drawSceneTexture} from "./draw-scene.js";
+import { initBuffers, initBuffersTexture, initBuffers2} from "./init-buffers.js";
+import {drawTex,drawScene, createTexture, drawPlane, drawSceneTexture} from "./draw-scene.js";
 import {tex,planePos, planeTrig,cubeLines, monochromatic,basicColours,colourScheme1,dodecahedronColours, dodecahedronPosistionOrdered,dodecahedronIndecies,dodecahedronIndeciesLinesOrdered,dodecahedronIndeciesOrdered,dodecahedronPosistion,cubeIndecies,cubePosistions} from "./constants.js"
 ///////////////////////////////
 // GLSL source
@@ -72,7 +72,6 @@ const simpleFragmentSource = `
 
 const textureVertexSource = `
   attribute vec4 vertexPosition;
-  attribute vec4 vertexColour;
   attribute vec2 texCoord;
 
   uniform mat4 modelViewMatrix;
@@ -82,7 +81,7 @@ const textureVertexSource = `
 
   void main() {
     // Multiply the position by the matrix.
-    gl_Position = vertexPosition;
+    gl_Position = projectionMatrix * modelViewMatrix *vertexPosition;
 
     // Pass the texcoord to the fragment shader.
     v_texcoord = texCoord;
@@ -99,9 +98,34 @@ const textureFragmentSource = `
   uniform sampler2D u_texture;
 
   void main() {
-    gl_FragColor = texture2D(u_texture, v_texcoord+vec2(0.0,0.0));
+    gl_FragColor = vec4(v_texcoord, 0.0, 1.0);
   }
 `
+
+const vsSource = `
+    attribute vec4 aVertexPosition;
+    attribute vec2 aTextureCoord;
+
+    uniform mat4 uModelViewMatrix;
+    uniform mat4 uProjectionMatrix;
+
+    varying highp vec2 vTextureCoord;
+
+    void main(void) {
+      gl_Position = aVertexPosition;
+      vTextureCoord = aTextureCoord;
+    }
+  `;
+
+const fsSource = `
+    varying highp vec2 vTextureCoord;
+
+    uniform sampler2D uSampler;
+
+    void main(void) {
+      gl_FragColor = texture2D(uSampler, vTextureCoord);
+    }
+  `;
 
 ///////////////////////////////
 // Global variables
@@ -136,7 +160,6 @@ function loadShader(gl, type, source){
 function initShaderProgram(gl, vertexSource, fragmentSource) {
     const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexSource);
     const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-
     //Create shader program
 
     const shaderProgram = gl.createProgram();
@@ -156,7 +179,73 @@ function initShaderProgram(gl, vertexSource, fragmentSource) {
     return shaderProgram;
 }
 
+//
+// Initialize a texture and load an image.
+// When the image finished loading copy it into the texture.
+//
+function loadTexture(gl, url) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
 
+  // Because images have to be downloaded over the internet
+  // they might take a moment until they are ready.
+  // Until then put a single pixel in the texture so we can
+  // use it immediately. When the image has finished downloading
+  // we'll update the texture with the contents of the image.
+  const level = 0;
+  const internalFormat = gl.RGBA;
+  const width = 1;
+  const height = 1;
+  const border = 0;
+  const srcFormat = gl.RGBA;
+  const srcType = gl.UNSIGNED_BYTE;
+  const pixel = new Uint8Array([0, 0, 255, 255]); // opaque blue
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    level,
+    internalFormat,
+    width,
+    height,
+    border,
+    srcFormat,
+    srcType,
+    pixel,
+  );
+
+  const image = new Image();
+  image.onload = () => {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      level,
+      internalFormat,
+      srcFormat,
+      srcType,
+      image,
+    );
+
+    // WebGL1 has different requirements for power of 2 images
+    // vs. non power of 2 images so check if the image is a
+    // power of 2 in both dimensions.
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+      // Yes, it's a power of 2. Generate mips.
+      gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+      // No, it's not a power of 2. Turn off mips and set
+      // wrapping to clamp to edge
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+  };
+  image.src = url;
+
+  return texture;
+}
+
+function isPowerOf2(value) {
+  return (value & (value - 1)) === 0;
+}
 
 
 ///////////////////////////////
@@ -184,6 +273,20 @@ function main(){
   const shaderProgram = initShaderProgram(gl, vertexSource, fragmentSource);
   const blackShaderProgram = initShaderProgram(gl, simpleVertexSource, simpleFragmentSource);
   const textureProgram = initShaderProgram(gl, textureVertexSource, textureFragmentSource);
+  const texProgram = initShaderProgram(gl, vsSource, fsSource);
+
+  const programInfoTex = {
+    program: texProgram,
+    attribLocations: {
+      vertexPosition: gl.getAttribLocation(texProgram, "aVertexPosition"),
+      textureCoord: gl.getAttribLocation(texProgram, "aTextureCoord"),
+    },
+    uniformLocations: {
+      projectionMatrix: gl.getUniformLocation(texProgram, "uProjectionMatrix"),
+      modelViewMatrix: gl.getUniformLocation(texProgram, "uModelViewMatrix"),
+      uSampler: gl.getUniformLocation(texProgram, "uSampler"),
+    },
+  };
 
   const programInfo = {
       program : shaderProgram,
@@ -210,9 +313,8 @@ function main(){
   const textureProgramInfo = {
     program : textureProgram,
     attribLocations:{
-      vertexPosition: gl.getAttribLocation(blackShaderProgram, "vertexPosition"),
-      vertexColour: gl.getAttribLocation(blackShaderProgram,"vertexColour"),
-      texCoord: gl.getAttribLocation(blackShaderProgram, "texCoord"),
+      vertexPosition: gl.getAttribLocation(textureProgram, "vertexPosition"),
+      texCoord: gl.getAttribLocation(textureProgram, "texCoord"),
     },
     uniformLocations:{
       projectionMatrix: gl.getUniformLocation(textureProgram,"projectionMatrix"),
@@ -221,13 +323,24 @@ function main(){
     },
   }
   const dodec = initBuffers(gl, dodecahedronPosistionOrdered, monochromatic, dodecahedronIndeciesLinesOrdered, 0);
-  const cube = initBuffers(gl, cubePosistions, monochromatic, cubeIndecies, 1);
-  const cubeLine = initBuffers(gl, cubePosistions, [0.0,0.0,0.0,1.0], cubeLines, 2);
-  const plane = initBuffersTexture(gl, planePos, [0.75,1.0,0.0,1.0], planeTrig, 3, tex);
+  
+  const cube = initBuffers(gl, cubePosistions, monochromatic,cubeIndecies, 1);
 
+  const cubeLine = initBuffers(gl, cubePosistions, [0.0,0.0,0.0,1.0], cubeLines, 2);
+
+  const plane = initBuffers2(gl, planePos, tex,planeTrig, 1);
+
+  const texture = loadTexture(gl, "tex.png");
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   
   const doRotation = 1;
   const cubeRotation = -0.7;
+
+  const objectDraw = {
+    programInfo: programInfoTex,
+    bufferInfo: plane,
+    rotation: 0,
+  }
 
   var objectsToDraw = [
     {
@@ -246,13 +359,6 @@ function main(){
       rotation: cubeRotation,
     },
   ]
-
-  var planeInfo = {
-      programInfo: textureProgramInfo,
-      bufferInfo: plane,
-      rotation: 0,
-    };
-    
   const res = createTexture(gl);
   const fb = res[0];
   const tx = res[1];
@@ -271,7 +377,9 @@ function main(){
     then = now;
     //const startTime = performance.now(); //Try to keep below 8 ms for rendering only
     //drawScene(gl, objectsToDraw, rotation);
-    drawSceneTexture(gl, fb, tx, planeInfo, objectsToDraw, rotation);
+    drawSceneTexture(gl, fb, objectsToDraw,rotation);
+    drawTex(gl,objectDraw,tx,0);
+    //drawSceneTexture(gl, fb, tx, planeInfo, objectsToDraw, rotation);
     //const endTime = performance.now();
     //const executionTime = endTime - startTime;
     //console.log(`Execution time: ${executionTime} ms`);

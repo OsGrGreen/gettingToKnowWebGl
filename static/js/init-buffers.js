@@ -19,20 +19,39 @@ function initBuffers(gl, pos, colour, index, type){
     };
 }
 
+function initBuffers2(gl, pos, tex,index, type){
+    const posistionBuffer = initPosistionBuffer(gl, pos);
+    const textureCoordBuffer = initTextureBuffer(gl, tex);
+    const indexBuffer = initIndexBuffer(gl, index);
+    const vertices = index.length;
+
+    return {
+        position: posistionBuffer,
+        textureCoord: textureCoordBuffer,
+        indices: indexBuffer,
+        numVertices: vertices,
+        type: type,
+      };
+}
 
 
 function initBuffersTexture(gl, pos, colour, index, type, texture){
     const posistionBuffer = initPosistionBuffer(gl, pos);
     let colourBuffer = null;
-    if (type == 0){
-        colourBuffer = initColourBufferVertex(gl, colour);
-    }else if(type == 2){
-        colourBuffer = initColourBufferVertex(gl, [0.0,0.0,0.0,1.0]);
-    }else{
-        colourBuffer = initColourBufferFace(gl, colour);
+    if (colour != null){
+        if (type == 0){
+            colourBuffer = initColourBufferVertex(gl, colour);
+        }else if(type == 2){
+            colourBuffer = initColourBufferVertex(gl, [0.0,0.0,0.0,1.0]);
+        }else{
+            colourBuffer = initColourBufferFace(gl, colour);
+        }
     }
+
     const indexBuffer = initIndexBuffer(gl, index);
+
     const vertices = index.length;
+
     let texcoordBuffer = null;
     if (texture != null){
         texcoordBuffer = initTextureBuffer(gl, texture);
@@ -40,6 +59,7 @@ function initBuffersTexture(gl, pos, colour, index, type, texture){
         texcoordBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
     }
+    
     return{
         position:posistionBuffer,
         colour:colourBuffer,
@@ -50,18 +70,47 @@ function initBuffersTexture(gl, pos, colour, index, type, texture){
     };
 }
 
-function initTextureBuffer(gl, texture){
-    const texcoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
-
+function initTextureBuffer(gl, tex) {
+    const textureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+  
+    const textureCoordinates = tex;
     gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Uint16Array(texture),
-        gl.STATIC_DRAW,
+      gl.ARRAY_BUFFER,
+      new Float32Array(textureCoordinates),
+      gl.STATIC_DRAW
     );
-    
-    return texcoordBuffer;
-}
+  
+    return textureCoordBuffer;
+  }
+
+function initTextureBuffer2(gl) {
+    const textureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+  
+    const textureCoordinates = [
+      // Front
+      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+      // Back
+      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+      // Top
+      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+      // Bottom
+      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+      // Right
+      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+      // Left
+      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    ];
+  
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array(textureCoordinates),
+      gl.STATIC_DRAW,
+    );
+  
+    return textureCoordBuffer;
+  }
 
 function initIndexBuffer(gl, index){
     const indexBuffer = gl.createBuffer();
@@ -142,4 +191,4 @@ function initPosistionBuffer(gl, pos){
     return posistionBuffer;
 }
 
-export { initBuffers, initBuffersTexture};
+export { initBuffers, initBuffersTexture, initBuffers2};
