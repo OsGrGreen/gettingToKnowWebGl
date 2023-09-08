@@ -9,7 +9,7 @@ canvas {
 
 div.container {
   display: block;
-  background-color:rgba(247,231,205,0.8);
+  /*background-color:rgba(247,231,205,0.8);*/
   position: relative; 
   z-index: 2;
   border: 2px solid black;
@@ -33,22 +33,38 @@ div.container {
 */
 p {
     opacity: 1;
+    left: 10px;
     color: #E34234;
     font-size: 35px;
+    font-family: 'blocky';
     z-index: 2;
-    margin-left: 5px;
+    /*margin-left: 5px;*/
     white-space: nowrap;
     overflow: hidden;
     position: relative;
 }
 
 .typewrite{
-
+  white-space: normal;
+  animation: blink 0.9s steps(2, start) infinite;
 }
 
-.typewrite.active::after{
-  content: "|";
-  animation: blink 500ms cubic-bezier(1,-0.07,.01,1.08) infinite alternate;
+/**
+.typewrite::after{
+  position: absolute;
+  content: "█";
+  color: yellow;
+  font-size: 28px;
+  animation: blink 900ms cubic-bezier(1,-0.07,.01,1.08) infinite;
+  z-index: 0;
+   animation: blinker 0.9s steps(2, start) infinite; 
+}
+*/
+
+@keyframes blinker {
+  to { 
+    visibility: hidden; 
+  }
 }
 
 .glcanvas{
@@ -64,19 +80,23 @@ p {
   opacity: 1;
 }
 
+#hidden{
+  display: none;
+}
+
 @-webkit-keyframes blink{
-  0%{opacity: 0;}
-  100%{opacity: 1;}
+  0%{background-color: rgba(237,145,33,1); color: rgba(135,40,31,1);}
+  100%{background-color: rgba(237,145,33,0);}
 }
 
 @-moz-keyframes blink{
-  0%{opacity: 0;}
-  100%{opacity: 1;}
+  0%{background-color: rgba(237,145,33,1); color: rgba(135,40,31,1);}
+  100%{background-color: rgba(237,145,33,0);}
 }
 
 @keyframes blink{
-  0%{opacity: 0;}
-  100%{opacity: 1;}
+  0%{background-color: rgba(237,145,33,1); color: rgba(135,40,31,1);}
+  100%{background-color: rgba(237,145,33,0);}
 }
 
 ::-moz-selection { /* Code for Firefox */
@@ -87,4 +107,9 @@ p {
 ::selection {
   color: #33302A;
   background: #FFBF00;
+}
+
+@font-face {
+  font-family: 'blocky';
+  src: url("Font/blocky.ttf");
 }
