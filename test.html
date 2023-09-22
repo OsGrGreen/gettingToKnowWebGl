@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Getting to know webgl </title>
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+    integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+    crossorigin="anonymous"
+    defer></script>
+    <script src="static/js/script.js" type="module"></script>
+    <script src="static/js/typewriter.js"></script>
+    <script src="static/js/slideshow.js"></script>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div role="presentation" id="background_scene" class="background">
+        <canvas id="glcanvas" width="640" height="480" class="glcanvas"></canvas>
+      </div>
+<h1>Oskar Grönman</h1>
+<div class="grid">
+    <div class="container2 slideshow" onmousedown="speedUp()" onmouseup="speedDown()">
+        <h2>Projects</h2>
+        <div class="projectSlide">
+            <h3>Mask R-CNN anomaly detection</h3>
+            <p class="text">&nbsp
+                <a id="hidden" aria-hidden="true">
+                    *Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus felis massa, vulputate in gravida in, feugiat nec lorem. Morbi faucibus sed massa sit amet lobortis. Etiam quis nisl nulla. Morbi posuere ultricies orci eu convallis. Aliquam vulputate nisl dictum, elementum dolor non, dictum lectus. In venenatis consectetur sodales. Sed in tellus non quam finibus pellentesque. Vestibulum nunc ipsum, aliquet eu convallis sit amet, facilisis sed turpis. Integer aliquam quam non libero consequat maximus.*
+                </a>
+            </p>
+        </div>
+        <div class="projectSlide">
+            <h3>3D-Modeling program</h3>
+            <p class="text">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus felis massa, vulputate in gravida in, feugiat nec lorem. Morbi faucibus sed massa sit amet lobortis. Etiam quis nisl nulla. Morbi posuere ultricies orci eu convallis. Aliquam vulputate nisl dictum, elementum dolor non, dictum lectus. In venenatis consectetur sodales. Sed in tellus non quam finibus pellentesque. Vestibulum nunc ipsum, aliquet eu convallis sit amet, facilisis sed turpis. Integer aliquam quam non libero consequat maximus.
+            <span class="typewrite">&nbsp;</span></p>
+        </div>
+        <div class="projectSlide">
+            <h3>ASCII-Game</h3>
+            <p class="text">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus felis massa, vulputate in gravida in, feugiat nec lorem. Morbi faucibus sed massa sit amet lobortis. Etiam quis nisl nulla. Morbi posuere ultricies orci eu convallis. Aliquam vulputate nisl dictum, elementum dolor non, dictum lectus. In venenatis consectetur sodales. Sed in tellus non quam finibus pellentesque. Vestibulum nunc ipsum, aliquet eu convallis sit amet, facilisis sed turpis. Integer aliquam quam non libero consequat maximus.
+            <span class="typewrite">&nbsp;</span></p>
+        </div>
+        <div class="projectSlide">
+            <h3>Sound producer</h3>
+            <p class="text">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus felis massa, vulputate in gravida in, feugiat nec lorem. Morbi faucibus sed massa sit amet lobortis. Etiam quis nisl nulla. Morbi posuere ultricies orci eu convallis. Aliquam vulputate nisl dictum, elementum dolor non, dictum lectus. In venenatis consectetur sodales. Sed in tellus non quam finibus pellentesque. Vestibulum nunc ipsum, aliquet eu convallis sit amet, facilisis sed turpis. Integer aliquam quam non libero consequat maximus.
+            <span class="typewrite">&nbsp;</span></p>
+        </div>
+          <!-- Next and previous buttons -->
+        <a class="prev" onclick="instant(), showPrevSlide()">&lt;</a>
+        <a class="next" onclick="instant(), showNextSlide()">&gt;</a>
+    </div>
+    <div class="container1" onclick="location.href='index.html';" style="cursor: pointer;">
+        <h2>About me</h2>
+        <p>
+            Add dithered picture of me here.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus felis massa, vulputate in gravida in, feugiat nec lorem. Morbi faucibus sed massa sit amet lobortis. Etiam quis nisl nulla. Morbi posuere ultricies orci eu convallis. Aliquam vulputate nisl dictum, elementum dolor non, dictum lectus. In venenatis consectetur sodales. Sed in tellus non quam finibus pellentesque. Vestibulum nunc ipsum, aliquet eu convallis sit amet, facilisis sed turpis.
+        </p>
+    </div>
+  <div class="container">
+    <h2>Contact me</h2>
+    <p>
+        You are more than welcome to contact me at: <a href="mailto:oskar.gronman@abc.se">oskar.gronman@abc.se</a>
+    </p></div>  
+  <div class="container">
+    <h2>Extras</h2>
+    (= ФェФ=)
+  </div>
+  <div class="container3">
+    <h2>Posts</h2>
+    <div class="post"><p>This could be a post</p></div>
+    <div class="post"><p>This could be another post</p></div>
+  </div> 
+</div>
+
+</body>
+</html>
+
+

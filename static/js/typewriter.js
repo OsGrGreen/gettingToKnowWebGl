@@ -1,10 +1,45 @@
+var waitTime = 5;
+var randomWaitTime = 20;
+
 window.addEventListener('load', async function () {
     console.log("loaded");
-    let area = document.getElementById('text1');
-    change(area);
-    area = document.getElementById('text2');
-    change(area);
+    let area = document.getElementsByClassName('projectSlide');
+    let child = area[0].getElementsByClassName("text")[0];
+    addStart(child);
 })
+
+
+
+//TODO: 
+// Add functionality to add HTML elements to the written (and removed) text..
+    //This could be done by when we get the start of the part, we check if it contains any < before the end, and then get the corresponding >
+    // Then take that part from the rawHtml and add it back into the rawHtml
+let spanEffectStart = "<span class=\"canSelect\">";
+let spanEffectEnd = "<\\span>";
+
+function instant(){
+    waitTime = 0;
+    randomWaitTime = 0; 
+}
+
+function speedUp(){
+    waitTime = 0;
+    randomWaitTime = 2;
+}
+
+function speedDown(){
+    waitTime = 5;
+    randomWaitTime = 20;
+}
+
+async function addStart(area){
+    let pos = 0;
+    let possibleText = area.textContent;
+    let part = possibleText.indexOf('*')+1;
+    let secondPart = possibleText.indexOf('*', part);
+    const text = possibleText.substring(part,secondPart);
+    pos =  addTypeWrite(text, area, pos+1);
+}
 
 async function change(area){
     let pos = 0
@@ -12,20 +47,30 @@ async function change(area){
     let part = possibleText.indexOf('*')+1;
     let secondPart = possibleText.indexOf('*', part);
     const text = possibleText.substring(part,secondPart);
-    pos = await addTypeWrite(text, area, pos);
+    pos =  addInstantly(text, area, pos);
     await sleep(500);
     pos = pos - 1;
     pos = await moveTypeWrite(0, area, pos);
     part = possibleText.indexOf('~')+1;
     secondPart = possibleText.indexOf('~', part);
     let searchWord = possibleText.substring(part, secondPart);
-    part = possibleText.indexOf(searchWord) + Math.ceil(searchWord.length/2);
+    console.log("search word is: " + searchWord);
+    part = possibleText.indexOf(searchWord) + searchWord.length-1;
+    console.log(part);
+    await sleep(500);
+    addSpan(part,searchWord,area);
+    await sleep(500);
     pos = await moveTypeWrite(part, area, pos);
-    pos = await deleteTypeWritePart(area, Math.ceil(searchWord.length), pos);
+    pos = await deleteTypeWritePart(area, searchWord.length + 1, pos);
     part = possibleText.indexOf('^')+1;
     secondPart = possibleText.indexOf('^', part);
     let addWord = possibleText.substring(part, secondPart, pos);
     pos = await addTypeWritePart(area, addWord, pos);
+    let innerSearchWord = '^' + addWord+'^';
+    let innerPart = possibleText.indexOf(innerSearchWord) + innerSearchWord.length;
+    console.log(innerPart);
+    let res = possibleText.substring(innerPart);
+    area.innerHTML = area.innerHTML + '<a id="hidden" aria-hidden="true">' + res + '</a>';
     console.log(area.innerHTML);
 }
 
@@ -34,12 +79,31 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max)*5;
 }
 
+
+function addSelect(letter){
+    return `<span class='canSelect'>` + letter + `</span>`;
+}
+
+function addSpan(part, searchWord,area){
+    let raw = area.textContent
+    let possiblePart = raw.indexOf(searchWord);
+    area.innerHTML = [raw.slice(0,possiblePart),addSelect(searchWord),raw.slice(possiblePart + searchWord.length)].join('');
+}
+
 async function addTypeWrite(text, area, pos){
     for(let i = 0; i <= text.length; i++){
         area.innerHTML = text.substring(0,i+1);
         insertTypeEffect(pos, area);
         pos = pos + 1;
-        await sleep(50+getRandomInt(25));
+        await sleep(waitTime+getRandomInt(randomWaitTime));
+    }
+    return pos;
+}
+
+function addInstantly(text, area, pos){
+    for(let i = 0; i <= text.length; i++){
+        area.innerHTML = text.substring(0,i+1);
+        pos = pos + 1;
     }
     return pos;
 }
